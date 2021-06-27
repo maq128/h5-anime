@@ -2,7 +2,7 @@
   <div id="app">
     <div>bitcoin-forks</div>
     <Stage height="500px" ref="stage" />
-    <button @click="$refs.stage.play()">play</button>
+    <button @click="$refs.stage.new()">new</button>
   </div>
 </template>
 

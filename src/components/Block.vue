@@ -14,9 +14,9 @@
         </foreignObject>
         <foreignObject width="100" height="100">
           <div class="ledger" xmlns="http://www.w3.org/1999/xhtml">
-            <p class="miner">A: {{ A }}</p>
-            <p>B: {{ B }}</p>
-            <p>C: {{ C }}</p>
+            <p :class="miner=='A'?'miner':''">A: {{ A }}</p>
+            <p :class="miner=='B'?'miner':''">B: {{ B }}</p>
+            <p :class="miner=='C'?'miner':''">C: {{ C }}</p>
           </div>
         </foreignObject>
       </g>

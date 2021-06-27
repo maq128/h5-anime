@@ -1,10 +1,5 @@
 <template>
   <div class="stage" :style="cssProps" ref="stage">
-    <!--
-    <template v-for="(block) in blocks">
-      <component :is="BlockClass" :key="block.name"></component>
-    </template>
-    -->
   </div>
 </template>
 
@@ -15,11 +10,13 @@ export default {
   name: 'Stage',
   data () {
     return {
-      blocks: []
+      actors: [],
+      ledger: {
+        A: 10,
+        B: 6,
+        C: 9
+      }
     }
-  },
-  components: {
-    // Block
   },
   props: {
     width: {
@@ -40,33 +37,35 @@ export default {
     }
   },
   methods: {
-    play () {
+    new () {
       this.removeAll()
-      var ledger = {
-        A: 10,
-        B: 6,
-        C: 9
-      }
-      for (var i=0; i< 5; i++) {
-        var miner = 'ABC'[Math.floor(Math.random() * 3)]
-        var propsData = {
-          x: 100 + i * 160,
-          y: 200,
-          miner,
-          ledger
-        }
-        // this.blocks.push(propsData)
-        var block = new this.BlockClass({ propsData })
-        block.$mount()
-        this.$refs.stage.appendChild(block.$el)
-      }
     },
     removeAll () {
-      console.log(this.$children)
+      this.actors.forEach(actor => {
+        actor.$destroy()
+      })
+      this.actors = []
+      this.$refs.stage.innerHTML = ''
     }
   },
-  created () {
+  mounted () {
     this.BlockClass = Vue.extend(Block)
+    for (var i=0; i< 5; i++) {
+      var miner = 'ABC'[Math.floor(Math.random() * 3)]
+      this.ledger[miner] ++
+      var propsData = {
+        x: 100 + i * 160,
+        y: 200,
+        miner,
+        ledger: { ...this.ledger }
+      }
+      var block = new this.BlockClass({
+        propsData
+      })
+      this.actors.push(block)
+      block.$mount()
+      this.$refs.stage.appendChild(block.$el)
+    }
   }
 }
 </script>
