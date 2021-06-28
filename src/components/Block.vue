@@ -1,5 +1,5 @@
 <template>
-  <div class="block" :style="cssProps">
+  <div class="block" :style="cssProps" :class="{flash}">
     <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 50 50">
       <defs>
         <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
@@ -7,8 +7,8 @@
         </marker>
       </defs>
       <g>
-        <rect x="-50" y="-80" width="50" height="30" stroke="#fff" fill="#888"/>
-        <rect x="-50" y="-50" width="100" height="100" stroke="#fff" fill="#888"/>
+        <rect x="-50" y="-80" width="50" height="30" stroke="#fff" :fill="flash ? '#f00' : '#888'"/>
+        <rect x="-50" y="-50" width="100" height="100" stroke="#fff" :fill="flash ? '#f00' : '#888'"/>
         <line x1="-55" y1="0" :x2="prevX" :y2="prevY" stroke="#fff" fill="#fff" marker-end="url(#arrowhead)"/>
         <foreignObject x="-50" y="-80" width="50" height="30">
           <div class="tag" xmlns="http://www.w3.org/1999/xhtml">
@@ -37,7 +37,8 @@ export default {
     return {
       A: this.ledger.A,
       B: this.ledger.B,
-      C: this.ledger.C
+      C: this.ledger.C,
+      flash: false, // 是否需要闪光效果（表示即将分叉）
     }
   },
   props: {
@@ -100,6 +101,7 @@ export default {
     if (this.mining > 0) {
       setTimeout(() => {
         this.mining = 0
+        this.flash = false
         setTimeout(() => {
           this.$emit('mined')
         }, 500)
@@ -117,6 +119,9 @@ export default {
   background-color: transparent;
   width: 0;
   height: 0;
+}
+.block.flash {
+  background-color: red;
 }
 svg {
   overflow: visible;
