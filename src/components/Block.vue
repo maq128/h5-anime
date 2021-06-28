@@ -1,12 +1,15 @@
 <template>
   <div class="block" :style="cssProps">
     <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 50 50">
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#fff" />
+        </marker>
+      </defs>
       <g>
         <rect x="-50" y="-80" width="50" height="30" stroke="#fff" fill="#888"/>
         <rect x="-50" y="-50" width="100" height="100" stroke="#fff" fill="#888"/>
-        <line :x1="prevX" :y1="prevY" x2="-55" y2="0" stroke="#fff" fill="none"/>
-        <line :x1="prevX" :y1="prevY" :x2="prevX + 10" :y2="prevY - 5" stroke="#fff" fill="none"/>
-        <line :x1="prevX" :y1="prevY" :x2="prevX + 10" :y2="prevY + 5" stroke="#fff" fill="none"/>
+        <line x1="-55" y1="0" :x2="prevX" :y2="prevY" stroke="#fff" fill="#fff" marker-end="url(#arrowhead)"/>
         <foreignObject x="-50" y="-80" width="50" height="30">
           <div class="tag" xmlns="http://www.w3.org/1999/xhtml">
             {{ mining > 0 ? '?' : miner }}
