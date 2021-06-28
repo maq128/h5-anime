@@ -1,8 +1,7 @@
 <template>
   <div id="app">
-    <div>bitcoin-forks</div>
+    <div>比特币分叉</div>
     <Stage height="500px" ref="stage" />
-    <button @click="$refs.stage.new()">new</button>
   </div>
 </template>
 

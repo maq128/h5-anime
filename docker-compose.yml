@@ -1,0 +1,14 @@
+version: "3.6"
+
+services:
+  h5-anime:
+    image: h5-anime
+    container_name: h5-anime
+    restart: "no"
+    networks:
+      main_network:
+
+networks:
+  main_network:
+    name: main_network
+    external: true

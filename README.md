@@ -5,3 +5,9 @@
 # 参考资料
 
 [Creating Vue.js Component Instances Programmatically](https://css-tricks.com/creating-vue-js-component-instances-programmatically/)
+
+[vue-anime](https://github.com/BenAHammond/vue-anime)
+
+[anime.js](https://animejs.com/)
+  | [github](https://github.com/juliangarnier/anime/)
+  | [文档](https://animejs.com/documentation/)

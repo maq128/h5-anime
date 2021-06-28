@@ -1,22 +1,25 @@
 <template>
   <div class="block" :style="cssProps">
-    <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 50 50">
       <g>
-        <rect x="0" y="-30" width="50" height="30" stroke="#fff" fill="#888"/>
-        <rect x="0" y="0" width="100" height="100" stroke="#fff" fill="#888"/>
-        <line x1="-50" y1="50" x2="-5" y2="50" stroke="#fff" fill="none"/>
-        <line x1="-50" y1="50" x2="-40" y2="45" stroke="#fff" fill="none"/>
-        <line x1="-50" y1="50" x2="-40" y2="55" stroke="#fff" fill="none"/>
-        <foreignObject x="0" y="-30" width="50" height="30">
+        <rect x="-50" y="-80" width="50" height="30" stroke="#fff" fill="#888"/>
+        <rect x="-50" y="-50" width="100" height="100" stroke="#fff" fill="#888"/>
+        <line :x1="prevX" :y1="prevY" x2="-55" y2="0" stroke="#fff" fill="none"/>
+        <line :x1="prevX" :y1="prevY" :x2="prevX + 10" :y2="prevY - 5" stroke="#fff" fill="none"/>
+        <line :x1="prevX" :y1="prevY" :x2="prevX + 10" :y2="prevY + 5" stroke="#fff" fill="none"/>
+        <foreignObject x="-50" y="-80" width="50" height="30">
           <div class="tag" xmlns="http://www.w3.org/1999/xhtml">
-            {{ miner }}
+            {{ mining > 0 ? '?' : miner }}
           </div>
         </foreignObject>
-        <foreignObject width="100" height="100">
+        <foreignObject x="-50" y="-50" width="100" height="100">
           <div class="ledger" xmlns="http://www.w3.org/1999/xhtml">
-            <p :class="miner=='A'?'miner':''">A: {{ A }}</p>
-            <p :class="miner=='B'?'miner':''">B: {{ B }}</p>
-            <p :class="miner=='C'?'miner':''">C: {{ C }}</p>
+            <img v-if="mining > 0" src="../assets/mining.gif"/>
+            <template v-else>
+              <p :class="miner=='A'?'miner':''">A: {{ A }}</p>
+              <p :class="miner=='B'?'miner':''">B: {{ B }}</p>
+              <p :class="miner=='C'?'miner':''">C: {{ C }}</p>
+            </template>
           </div>
         </foreignObject>
       </g>
@@ -51,6 +54,14 @@ export default {
       type: Number,
       default: 100
     },
+    prev: {
+      type: Object,
+      default: null
+    },
+    mining: {
+      type: Number,
+      default: 0
+    },
     miner: {
       type: String,
       default: 'A'
@@ -67,6 +78,12 @@ export default {
     }
   },
   computed: {
+    prevX() {
+      return this.prev ? this.prev.x - this.x + 55 : -160 + 50
+    },
+    prevY() {
+      return this.prev ? this.prev.y - this.y : 0
+    },
     cssProps() {
       return {
         '--block-x': this.x + 'px',
@@ -74,6 +91,16 @@ export default {
         '--block-width': this.width + 'px',
         '--block-height': this.height + 'px'
       }
+    }
+  },
+  mounted () {
+    if (this.mining > 0) {
+      setTimeout(() => {
+        this.mining = 0
+        setTimeout(() => {
+          this.$emit('mined')
+        }, 500)
+      }, this.mining)
     }
   }
 }
@@ -85,11 +112,14 @@ export default {
   left: var(--block-x);
   top: var(--block-y);
   background-color: transparent;
-  width: var(--block-width);
-  height: var(--block-height);
+  width: 0;
+  height: 0;
 }
 svg {
   overflow: visible;
+  position: relative;
+  left: -50px;
+  top: -50px;
 }
 .tag {
   color: white;
