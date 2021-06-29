@@ -143,10 +143,12 @@ export default {
   color: #4484f5;
 }
 .block .M {
-  stroke: #f6ca5d;
-  color: #f6ca5d;
+  stroke: #7f8187;
+  color: #7f8187;
 }
 .block .flash {
+  stroke: #f6ca5d;
+  color: #f6ca5d;
   filter: drop-shadow( 0 0 5px gold );
 }
 svg {
