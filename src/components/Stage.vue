@@ -90,7 +90,6 @@ export default {
         prev: this.head,
         mining: 3000,
       })
-      var longHead = this.head
       shortHead = this.newHead({
         xpos: 4,
         ypos: 1,
