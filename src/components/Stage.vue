@@ -3,8 +3,8 @@
     <div class="headbar">实训案例1：比特币分叉</div>
     <div class="stage" :style="cssProps" ref="stage"></div>
     <div class="footbar">
-      <button @click="goSbf()" :disabled="inSbf || inDbf">单块分叉过程</button>
-      <button @click="goDbf()" :disabled="inSbf || inDbf">双块分叉过程</button>
+      <button @click="goSbf()" :class="{'in-progress':inSbf}" :disabled="inSbf || inDbf">单块分叉过程</button>
+      <button @click="goDbf()" :class="{'in-progress':inDbf}" :disabled="inSbf || inDbf">双块分叉过程</button>
     </div>
   </div>
 </template>
@@ -419,5 +419,9 @@ export default {
   color: gray;
   cursor: wait;
 }
-
+.footbar button.in-progress {
+  border: 1px solid #3183f2;
+  background-color: #3183f2;
+  color: white;
+}
 </style>
