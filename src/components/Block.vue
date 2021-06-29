@@ -99,13 +99,17 @@ export default {
   },
   mounted () {
     if (this.mining > 0) {
-      setTimeout(() => {
-        this.mining = 0
-        this.flash = false
+      this.mined = new Promise((resolve) => {
         setTimeout(() => {
-          this.$emit('mined')
-        }, 500)
-      }, this.mining)
+          this.mining = 0
+          this.flash = false
+          setTimeout(() => {
+            resolve()
+          }, 500)
+        }, this.mining)
+      })
+    } else {
+      this.mined = Promise.resolve()
     }
   }
 }

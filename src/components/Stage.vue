@@ -13,6 +13,7 @@ import Block from './Block.vue'
 
 export default {
   name: 'Stage',
+
   data () {
     return {
       ledger: {
@@ -24,6 +25,7 @@ export default {
       inDbf: false,
     }
   },
+
   props: {
     width: {
       type: String,
@@ -34,6 +36,7 @@ export default {
       default: '400px'
     }
   },
+
   computed: {
     cssProps() {
       return {
@@ -42,6 +45,7 @@ export default {
       }
     }
   },
+
   methods: {
     goSbf () {
       if (this.inSbf || this.inDbf) return
@@ -53,10 +57,20 @@ export default {
     },
 
     goDbf () {
-      alert('尚未实现')
+      if (this.inSbf || this.inDbf) return
+      this.inDbf = true
+      if (this.head.mining) {
+        // 突显
+        this.head.flash = true
+      }
     },
 
     async sbf () {
+      // 短分叉上只有一个矿工
+      var shortMiner = this.head.miner == 'C' ? 'B' : 'C'
+      // 其余矿工都在长分叉上
+      var longMiners = 'ABC'.split(shortMiner).join('')
+
       // 长分叉上扬
       anime({
         targets: this.head,
@@ -66,12 +80,11 @@ export default {
 
       // 新增短分叉并下沉
       var fork = this.head.prev
-      var miners = 'ABC'.split(this.head.miner).join('')
       var ledger = { ...fork.ledger }
       var shortHead = this.newHead({
         xpos: this.head.xpos,
         prev: fork,
-        miners,
+        miners: shortMiner,
         ledger
       })
       await anime({
@@ -80,50 +93,143 @@ export default {
         easing: 'easeOutExpo',
       }).finished
 
-      // 整体向左平移一格
-      await this.shiftLeft()
-
-      // 两个新的 head
+      // 两个新的 head（shortHead 的挖矿时间要长很多）
       this.head = this.newHead({
-        xpos: 4,
+        xpos: 5,
         ypos: -1,
         prev: this.head,
+        miners: longMiners,
         mining: 3000,
       })
       shortHead = this.newHead({
-        xpos: 4,
+        xpos: 5,
         ypos: 1,
         prev: shortHead,
+        miners: shortMiner,
         mining: 50000,
       })
 
-      // 长分叉出块后
-      this.head.$once('mined', async () => {
-        // 短分叉消失
-        await anime({
-          targets: [shortHead.$el, shortHead.prev.$el],
-          opacity: [1.0, 0.0],
-          easing: 'linear',
-          duration: 2000,
-          delay: anime.stagger(500),
-        }).finished
+      // 整体向左平移一格
+      await this.shiftLeft()
 
-        // 长分叉归位
-        // console.log(longHead.$el, this.head.$el)
-        await anime({
-          targets: [this.head.prev, this.head],
-          y: [this.head.y, this.head.y + 80],
-          easing: 'easeOutExpo',
-          delay: anime.stagger(100),
-        }).finished
+      // 等待长分叉出块
+      await this.head.mined
 
-        // 回归正常过程
-        this.inSbf = false
-        this.round()
-      })
+      // 短分叉消失
+      await anime({
+        targets: [shortHead.$el, shortHead.prev.$el],
+        opacity: [1.0, 0.0],
+        easing: 'linear',
+        duration: 2000,
+        delay: anime.stagger(500),
+      }).finished
+
+      // 长分叉归位
+      await anime({
+        targets: [this.head.prev, this.head],
+        y: [this.head.y, this.head.y + 80],
+        easing: 'easeOutExpo',
+        delay: anime.stagger(100),
+      }).finished
+
+      // 回归正常过程
+      this.inSbf = false
+      this.round()
     },
 
-    dbf () {
+    async dbf () {
+      // 短分叉上只有一个矿工
+      var shortMiner = this.head.miner == 'C' ? 'B' : 'C'
+      // 其余矿工都在长分叉上
+      var longMiners = 'ABC'.split(shortMiner).join('')
+
+      // 长分叉上扬
+      anime({
+        targets: this.head,
+        y: [this.head.y, this.head.y - 80],
+        easing: 'easeOutExpo',
+      })
+
+      // 新增短分叉并下沉
+      var fork = this.head.prev
+      var ledger = { ...fork.ledger }
+      var shortHead = this.newHead({
+        xpos: this.head.xpos,
+        prev: fork,
+        miners: shortMiner,
+        ledger
+      })
+      await anime({
+        targets: shortHead,
+        y: [shortHead.y, shortHead.y + 80],
+        easing: 'easeOutExpo',
+      }).finished
+
+      // 两个新的 head（挖矿时间基本一样）
+      this.head = this.newHead({
+        xpos: 5,
+        ypos: -1,
+        prev: this.head,
+        miners: longMiners,
+        mining: 3000,
+      })
+      shortHead = this.newHead({
+        xpos: 5,
+        ypos: 1,
+        prev: shortHead,
+        miners: shortMiner,
+        mining: 3000,
+      })
+
+      // 整体向左平移一格
+      await this.shiftLeft()
+
+      // 长分叉出块后继续挖
+      await this.head.mined
+      this.head = this.newHead({
+        xpos: 5,
+        ypos: -1,
+        prev: this.head,
+        miners: longMiners,
+        mining: 3000,
+      })
+
+      // 短分叉出块后继续挖（这次的挖矿时间要长很多）
+      await shortHead.mined
+      shortHead = this.newHead({
+        xpos: 5,
+        ypos: 1,
+        prev: shortHead,
+        miners: shortMiner,
+        mining: 30000,
+      })
+
+      // 整体向左平移一格
+      await this.shiftLeft()
+
+      // 等待长分叉出块
+      await this.head.mined
+
+      // 短分叉消失
+      await anime({
+        targets: [shortHead.$el, shortHead.prev.$el, shortHead.prev.prev.$el],
+        opacity: [1.0, 0.0],
+        easing: 'linear',
+        duration: 2000,
+        delay: anime.stagger(500),
+      }).finished
+
+      // 长分叉归位
+      await anime({
+        targets: [this.head.prev.prev, this.head.prev, this.head],
+        y: [this.head.y, this.head.y + 80],
+        easing: 'easeOutExpo',
+        delay: anime.stagger(100),
+      }).finished
+
+      // 回归正常过程
+      this.inDbf = false
+      this.round()
     },
 
     newHead ({
@@ -219,15 +325,16 @@ export default {
         return
       }
 
-      // 整体向左平移一格
-      await this.shiftLeft()
-
+      // 新的挖矿区块
       this.head = this.newHead({
-        xpos: 4,
+        xpos: 5,
         prev: this.head,
         mining: 5000,
       })
-      this.head.$once('mined', this.round)
+      this.head.mined.then(this.round)
+
+      // 整体向左平移一格
+      this.shiftLeft()
 
       // 如果在平移期间启动了分叉，这里补充突显效果
       if (this.inSbf || this.inDbf) {
@@ -235,6 +342,7 @@ export default {
       }
     },
   },
+
   mounted () {
     this.BlockClass = Vue.extend(Block)
     this.actors = new Set()
@@ -250,7 +358,7 @@ export default {
         prev: this.head,
         mining: 3000,
     })
-    this.head.$once('mined', this.round)
+    this.head.mined.then(this.round)
   }
 }
 </script>
