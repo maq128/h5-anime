@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <div>比特币分叉</div>
     <Stage height="500px" ref="stage" />
   </div>
 </template>

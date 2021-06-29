@@ -1,28 +1,28 @@
 <template>
   <div class="block" :style="cssProps">
-    <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 50 50">
+    <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 50 50" :class="mining>0?'M':miner">
       <defs>
-        <marker id="arrowhead" markerWidth="12" markerHeight="7" refX="12" refY="3.5" orient="auto">
-          <polyline points="0 0, 12 3.5, 0 7" stroke="#fff" fill="transparent" />
+        <marker :id="`arrowhead-${minerName}`" :class="minerName" markerWidth="12" markerHeight="7" refX="12" refY="3.5" orient="auto">
+          <polyline points="0 0, 12 3.5, 0 7" fill="transparent" />
         </marker>
       </defs>
-      <foreignObject v-if="flash" class="flash" x="-50" y="-50" width="100" height="100">
-      </foreignObject>
-      <rect x="-50" y="-80" width="50" height="30" stroke="#fff" fill="#888"/>
-      <rect x="-50" y="-50" width="100" height="100" stroke="#fff" fill="#888"/>
-      <line x1="-55" y1="0" :x2="prevX" :y2="prevY" stroke="#fff" marker-end="url(#arrowhead)"/>
-      <foreignObject x="-50" y="-80" width="50" height="30">
+      <path fill="#3a3a3f" stroke="#222225" stroke-width="1" d="M -10 -50 v -15 c 0 -10, 0 -10, -10 -10 h -20 c -10 0, -10 0, -10 10 v 15 Z"/>
+      <path fill="#2d2d32" stroke="#222225" stroke-width="1" d="M 0 -50 h -40 c -10 0, -10 0, -10 10 v 80 c 0 10, 0 10, 10 10 h 80 c 10 0, 10 0, 10 -10 v -80 c 0 -10, 0 -10, -10 -10 Z"/>
+      <path v-if="flash" class="flash" fill="#333" stroke-width="1" d="M -50 0 v 40 c 0 10, 0 10, 10 10 h 80 c 10 0, 10 0, 10 -10 v -80 c 0 -10, 0 -10, -10 -10 h -50 v -15 c 0 -10, 0 -10, -10 -10 h -20 c -10 0, -10 0, -10 10 Z"/>
+      <path v-else fill="transparent" stroke-width="1" d="M -50 0 v 40 c 0 10, 0 10, 10 10 h 80 c 10 0, 10 0, 10 -10 v -80 c 0 -10, 0 -10, -10 -10 h -50 v -15 c 0 -10, 0 -10, -10 -10 h -20 c -10 0, -10 0, -10 10 Z"/>
+      <line x1="-55" y1="0" :x2="prevX" :y2="prevY" :marker-end="`url(#arrowhead-${minerName})`"/>
+      <foreignObject x="-50" y="-75" width="40" height="25">
         <div class="tag" xmlns="http://www.w3.org/1999/xhtml">
-          {{ mining > 0 ? '?' : miner }}
+          <span :class="minerName">{{ mining > 0 ? '?' : miner }}</span>
         </div>
       </foreignObject>
       <foreignObject x="-50" y="-50" width="100" height="100">
         <div class="ledger" xmlns="http://www.w3.org/1999/xhtml">
           <img v-if="mining > 0" src="../assets/mining.gif"/>
           <template v-else>
-            <p :class="miner=='A'?'miner':''">A: {{ A }}</p>
-            <p :class="miner=='B'?'miner':''">B: {{ B }}</p>
-            <p :class="miner=='C'?'miner':''">C: {{ C }}</p>
+            <p><span class="A">●</span><span class="name">A</span><span class="balance">{{ A }}</span><span v-if="miner=='A'" class="A">+1</span></p>
+            <p><span class="B">●</span><span class="name">B</span><span class="balance">{{ B }}</span><span v-if="miner=='B'" class="B">+1</span></p>
+            <p><span class="C">●</span><span class="name">C</span><span class="balance">{{ C }}</span><span v-if="miner=='C'" class="C">+1</span></p>
           </template>
         </div>
       </foreignObject>
@@ -38,7 +38,7 @@ export default {
       A: this.ledger.A,
       B: this.ledger.B,
       C: this.ledger.C,
-      flash: false, // 是否需要闪光效果（表示即将分叉）
+      flash: false, // 分叉预警效果
     }
   },
   props: {
@@ -93,8 +93,14 @@ export default {
         '--block-x': this.x + 'px',
         '--block-y': this.y + 'px',
         '--block-width': this.width + 'px',
-        '--block-height': this.height + 'px'
+        '--block-height': this.height + 'px',
+        '--color-a': '#61c9f1',
+        '--color-b': '#3183f2',
+        '--color-c': '#8172f5',
       }
+    },
+    minerName() {
+      return this.mining > 0 ? 'M' : this.miner
     }
   },
   mounted () {
@@ -124,8 +130,24 @@ export default {
   width: 0;
   height: 0;
 }
+.block .A {
+  stroke: #72caf3;
+  color: #72caf3;
+}
+.block .B {
+  stroke: #8273f8;
+  color: #8273f8;
+}
+.block .C {
+  stroke: #4484f5;
+  color: #4484f5;
+}
+.block .M {
+  stroke: #f6ca5d;
+  color: #f6ca5d;
+}
 .block .flash {
-  box-shadow: 0 0 15px 10px red;
+  filter: drop-shadow( 0 0 5px gold );
 }
 svg {
   overflow: visible;
@@ -134,18 +156,30 @@ svg {
   top: -50px;
 }
 .tag {
-  color: white;
+  color: #3179dd;
   text-align: center;
-  line-height: 30px;
-  font-size: 25px;
+  line-height: 25px;
+  font-size: 15px;
+  font-weight: bold;
 }
 .ledger p {
   margin: 0.4em;
   color: white;
-  font-size: 18px;
+  font-size: 15px;
+  line-height: 25px;
 }
 .ledger p.miner {
   color: gold;
   font-weight: bold;
 }
-</style>
+.ledger .name {
+  display: inline-block;
+  padding: 0 0.5em;
+  color: #989898;
+}
+.ledger .balance {
+  display: inline-block;
+  padding: 0 0.2em;
+  color: white;
+}
+  </style>

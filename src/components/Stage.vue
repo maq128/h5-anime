@@ -1,8 +1,11 @@
 <template>
   <div>
+    <div class="headbar">实训案例1：比特币分叉</div>
     <div class="stage" :style="cssProps" ref="stage"></div>
-    <button @click="goSbf()" :disabled="inSbf || inDbf">单块分叉过程</button>
-    <button @click="goDbf()" :disabled="inSbf || inDbf">双块分叉过程</button>
+    <div class="footbar">
+      <button @click="goSbf()" :disabled="inSbf || inDbf">单块分叉过程</button>
+      <button @click="goDbf()" :disabled="inSbf || inDbf">双块分叉过程</button>
+    </div>
   </div>
 </template>
 
@@ -247,7 +250,6 @@ export default {
       if (!miners) miners = 'ABC'
       if (!miner) miner = miners[Math.floor(Math.random() * miners.length)]
       if (!ledger) ledger = this.ledger
-      ledger[miner] ++
       var propsData = {
         x: 80 + xpos * 160,
         y: 200 + ypos * 80,
@@ -260,6 +262,8 @@ export default {
         propsData
       })
       this.actors.add(block)
+
+      ledger[miner] ++
 
       // 额外记录水平位置
       block.xpos = xpos
@@ -344,6 +348,7 @@ export default {
   },
 
   mounted () {
+    anime.suspendWhenDocumentHidden = false
     this.BlockClass = Vue.extend(Block)
     this.actors = new Set()
     this.head = null
@@ -365,13 +370,54 @@ export default {
 
 <style scoped>
 .stage {
-  background-color: black;
+  background-color: #212128;
   width: var(--stage-width);
   height: var(--stage-height);
   position: relative;
   overflow: hidden;
 }
-button {
-  margin: 1em 1em 1em 0;
+.headbar {
+  padding: 1em;
+  color: white;
+  background-color: #1b1b22;
+  text-align: left;
 }
+.headbar::before {
+  content: '';
+  display: inline-block;
+  width: 0.3em;
+  height: 1.2em;
+  vertical-align: middle;
+  margin-right: 0.5em;
+  background-color: #2f6392;
+}
+.footbar {
+  padding: 1em;
+  background-color: #1b1b22;
+  text-align: center;
+}
+.footbar button {
+  margin: 0 1em;
+  padding: 1em;
+  border: 1px solid #2d2d32;
+  border-radius: 5px;
+  background-color: #2d2d32;
+  color: white;
+  cursor: pointer;
+}
+.footbar button:hover {
+  border: 1px solid #3183f2;
+  color: #3183f2;
+}
+.footbar button:active {
+  border: 1px solid #3183f2;
+  background-color: #3183f2;
+  color: white;
+}
+.footbar button[disabled] {
+  border: 1px solid #2d2d32;
+  color: gray;
+  cursor: wait;
+}
+
 </style>
