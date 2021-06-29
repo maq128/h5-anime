@@ -17,13 +17,19 @@
         </div>
       </foreignObject>
       <foreignObject x="-50" y="-50" width="100" height="100">
-        <div class="ledger" xmlns="http://www.w3.org/1999/xhtml">
-          <img v-if="mining > 0" src="../assets/mining.gif"/>
-          <template v-else>
-            <p><span class="A">●</span><span class="name">A</span><span class="balance">{{ A }}</span><span v-if="miner=='A'" class="A">+1</span></p>
-            <p><span class="B">●</span><span class="name">B</span><span class="balance">{{ B }}</span><span v-if="miner=='B'" class="B">+1</span></p>
-            <p><span class="C">●</span><span class="name">C</span><span class="balance">{{ C }}</span><span v-if="miner=='C'" class="C">+1</span></p>
-          </template>
+        <div v-if="mining">
+          <transition name="mined">
+            <img src="../assets/mining.gif"/>
+          </transition>
+        </div>
+        <div v-else class="ledger" xmlns="http://www.w3.org/1999/xhtml">
+          <transition name="mined">
+            <div>
+              <p><span class="A">●</span><span class="name">A</span><span class="balance">{{ A }}</span><span v-if="miner=='A'" class="A">+1</span></p>
+              <p><span class="B">●</span><span class="name">B</span><span class="balance">{{ B }}</span><span v-if="miner=='B'" class="B">+1</span></p>
+              <p><span class="C">●</span><span class="name">C</span><span class="balance">{{ C }}</span><span v-if="miner=='C'" class="C">+1</span></p>
+            </div>
+          </transition>
         </div>
       </foreignObject>
     </svg>
@@ -31,6 +37,7 @@
 </template>
 
 <script>
+// https://segmentfault.com/a/1190000017159826
 export default {
   name: 'Block',
   data () {
