@@ -353,7 +353,6 @@ export default {
   },
 
   mounted () {
-    anime.suspendWhenDocumentHidden = false
     this.BlockClass = Vue.extend(Block)
     this.actors = new Set()
     this.head = null
