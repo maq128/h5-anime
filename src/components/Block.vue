@@ -1,6 +1,6 @@
 <template>
   <div class="block" :style="cssProps">
-    <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 50 50" :class="mining>0?'M':miner">
+    <svg width="50" height="50" xmlns="http://www.w3.org/2000/svg" viewBox="-50 -50 50 50" :class="minerName">
       <defs>
         <marker :id="`arrowhead-${minerName}`" :class="minerName" markerWidth="12" markerHeight="7" refX="12" refY="3.5" orient="auto">
           <polyline points="0 0, 12 3.5, 0 7" fill="transparent" />
@@ -13,18 +13,18 @@
       <line x1="-55" y1="0" :x2="prevX" :y2="prevY" :marker-end="`url(#arrowhead-${minerName})`"/>
       <foreignObject x="-50" y="-75" width="40" height="25">
         <div class="tag" xmlns="http://www.w3.org/1999/xhtml">
-          <span :class="minerName">{{ mining > 0 ? '?' : miner }}</span>
+          <span :class="minerName">{{ minerName == 'M' ? '?' : miner }}</span>
         </div>
       </foreignObject>
       <foreignObject x="-50" y="-50" width="100" height="100">
         <div class="ledger" xmlns="http://www.w3.org/1999/xhtml">
-          <div class="content">
+          <div v-if="minerName != 'M'" class="content">
             <p><span class="A">●</span><span class="name">A</span><span class="balance">{{ A }}</span><span v-if="miner=='A'" class="A">+1</span></p>
             <p><span class="B">●</span><span class="name">B</span><span class="balance">{{ B }}</span><span v-if="miner=='B'" class="B">+1</span></p>
             <p><span class="C">●</span><span class="name">C</span><span class="balance">{{ C }}</span><span v-if="miner=='C'" class="C">+1</span></p>
           </div>
-          <transition name="mined">
-            <img v-if="mining>0" class="content" src="../assets/mining.gif"/>
+          <transition name="mined" appear>
+            <img v-if="minerName == 'M'" class="content" src="../assets/mining.gif"/>
           </transition>
         </div>
       </foreignObject>
@@ -94,11 +94,6 @@ export default {
       return {
         '--block-x': this.x + 'px',
         '--block-y': this.y + 'px',
-        '--block-width': this.width + 'px',
-        '--block-height': this.height + 'px',
-        '--color-a': '#61c9f1',
-        '--color-b': '#3183f2',
-        '--color-c': '#8172f5',
       }
     },
     minerName() {
@@ -126,7 +121,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .block {
   position: absolute;
   left: var(--block-x);
@@ -176,38 +171,48 @@ svg {
   top: 1px;
   width: 98px;
   height: 98px;
-}
-.ledger .content {
-  position: absolute;
-}
-.ledger p {
-  margin: 0.4em;
-  color: white;
-  font-size: 15px;
-  line-height: 25px;
-}
-.ledger p.miner {
-  color: gold;
-  font-weight: bold;
-}
-.ledger .name {
-  display: inline-block;
-  padding: 0 0.5em;
-  color: #989898;
-}
-.ledger .balance {
-  display: inline-block;
-  padding: 0 0.2em;
-  color: white;
-}
 
-.mined-enter-active, .mined-leave-active {
-  transition: left 1s ease 0s;
-}
-.mined-enter, .mined-leave-to {
-  left: 100px;
-}
-.mined-leave, .mined-enter-to {
-  left: 0px;
+  .content {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+
+    p {
+      margin: 0.4em;
+      color: white;
+      font-size: 15px;
+      line-height: 25px;
+
+      .miner {
+        color: gold;
+        font-weight: bold;
+      }
+
+      .name {
+        display: inline-block;
+        padding: 0 0.5em;
+        color: #989898;
+      }
+
+      .balance {
+        display: inline-block;
+        padding: 0 0.2em;
+        color: white;
+      }
+    }
+  }
+
+  .mined-enter-active, .mined-leave-active {
+    transition: left 1s ease 0s;
+  }
+  .mined-enter {
+    left: -100px;
+  }
+  .mined-enter-to, .mined-leave {
+    left: 0px;
+  }
+  .mined-leave-to {
+    left: 100px;
+  }
 }
 </style>
