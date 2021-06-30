@@ -10,7 +10,6 @@
   "dependencies": {
     "animejs": "^3.2.1",
     "core-js": "^3.6.5",
-    "less-loader": "^5.0.0",
     "vue": "^2.6.11"
   },
   "devDependencies": {
@@ -21,6 +20,7 @@
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
     "less": "^4.1.1",
+    "less-loader": "^5.0.0",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
