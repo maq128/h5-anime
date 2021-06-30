@@ -17,18 +17,14 @@
         </div>
       </foreignObject>
       <foreignObject x="-50" y="-50" width="100" height="100">
-        <div v-if="mining">
+        <div class="ledger" xmlns="http://www.w3.org/1999/xhtml">
+          <div class="content">
+            <p><span class="A">●</span><span class="name">A</span><span class="balance">{{ A }}</span><span v-if="miner=='A'" class="A">+1</span></p>
+            <p><span class="B">●</span><span class="name">B</span><span class="balance">{{ B }}</span><span v-if="miner=='B'" class="B">+1</span></p>
+            <p><span class="C">●</span><span class="name">C</span><span class="balance">{{ C }}</span><span v-if="miner=='C'" class="C">+1</span></p>
+          </div>
           <transition name="mined">
-            <img src="../assets/mining.gif"/>
-          </transition>
-        </div>
-        <div v-else class="ledger" xmlns="http://www.w3.org/1999/xhtml">
-          <transition name="mined">
-            <div>
-              <p><span class="A">●</span><span class="name">A</span><span class="balance">{{ A }}</span><span v-if="miner=='A'" class="A">+1</span></p>
-              <p><span class="B">●</span><span class="name">B</span><span class="balance">{{ B }}</span><span v-if="miner=='B'" class="B">+1</span></p>
-              <p><span class="C">●</span><span class="name">C</span><span class="balance">{{ C }}</span><span v-if="miner=='C'" class="C">+1</span></p>
-            </div>
+            <img v-if="mining>0" class="content" src="../assets/mining.gif"/>
           </transition>
         </div>
       </foreignObject>
@@ -37,7 +33,6 @@
 </template>
 
 <script>
-// https://segmentfault.com/a/1190000017159826
 export default {
   name: 'Block',
   data () {
@@ -171,6 +166,17 @@ svg {
   font-size: 15px;
   font-weight: bold;
 }
+.ledger {
+  overflow: hidden;
+  position: relative;
+  left: 1px;
+  top: 1px;
+  width: 98px;
+  height: 98px;
+}
+.ledger .content {
+  position: absolute;
+}
 .ledger p {
   margin: 0.4em;
   color: white;
@@ -191,4 +197,14 @@ svg {
   padding: 0 0.2em;
   color: white;
 }
-  </style>
+
+.mined-enter-active, .mined-leave-active {
+  transition: left 1s ease 0s;
+}
+.mined-enter, .mined-leave-to {
+  left: 100px;
+}
+.mined-leave, .mined-enter-to {
+  left: 0px;
+}
+</style>

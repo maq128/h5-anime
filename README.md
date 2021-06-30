@@ -9,3 +9,5 @@
 [anime.js](https://animejs.com/)
   | [github](https://github.com/juliangarnier/anime/)
   | [文档](https://animejs.com/documentation/)
+
+[Vue 中使用 transition](https://segmentfault.com/a/1190000017159826)

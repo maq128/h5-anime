@@ -424,14 +424,4 @@ export default {
   background-color: #3183f2;
   color: white;
 }
-
-.mined-enter-active {
-  transition: transform 1s;
-}
-.mined-leave-active {
-  transition: transform 1s;
-}
-.mined-enter, .mined-leave-to {
-  transform: scaleY(0);
-}
 </style>
