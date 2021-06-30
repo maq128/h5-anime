@@ -54,7 +54,7 @@ export default {
       if (this.inSbf || this.inDbf) return
       this.inSbf = true
       if (this.head.mining) {
-        // 突显
+        // 分叉预警
         this.head.flash = true
       }
     },
@@ -63,7 +63,7 @@ export default {
       if (this.inSbf || this.inDbf) return
       this.inDbf = true
       if (this.head.mining) {
-        // 突显
+        // 分叉预警
         this.head.flash = true
       }
     },
@@ -83,12 +83,12 @@ export default {
 
       // 新增短分叉并下沉
       var fork = this.head.prev
-      var ledger = { ...fork.ledger }
+      var shortLedger = { ...this.head.ledger }
       var shortHead = this.newHead({
         xpos: this.head.xpos,
         prev: fork,
         miners: shortMiner,
-        ledger
+        ledger: shortLedger,
       })
       await anime({
         targets: shortHead,
@@ -96,7 +96,7 @@ export default {
         easing: 'easeOutExpo',
       }).finished
 
-      // 两个新的 head（shortHead 的挖矿时间要长很多）
+      // 长分叉追加 mining block
       this.head = this.newHead({
         xpos: 5,
         ypos: -1,
@@ -104,11 +104,14 @@ export default {
         miners: longMiners,
         mining: 3000,
       })
+
+      // 短分叉追加 mining block（挖矿时间要长很多）
       shortHead = this.newHead({
         xpos: 5,
         ypos: 1,
         prev: shortHead,
         miners: shortMiner,
+        ledger: shortLedger,
         mining: 50000,
       })
 
@@ -155,12 +158,12 @@ export default {
 
       // 新增短分叉并下沉
       var fork = this.head.prev
-      var ledger = { ...fork.ledger }
+      var shortLedger = { ...this.head.ledger }
       var shortHead = this.newHead({
         xpos: this.head.xpos,
         prev: fork,
         miners: shortMiner,
-        ledger
+        ledger: shortLedger,
       })
       await anime({
         targets: shortHead,
@@ -168,7 +171,7 @@ export default {
         easing: 'easeOutExpo',
       }).finished
 
-      // 两个新的 head（挖矿时间基本一样）
+      // 两个新的 mining block（挖矿时间相同）
       this.head = this.newHead({
         xpos: 5,
         ypos: -1,
@@ -181,13 +184,14 @@ export default {
         ypos: 1,
         prev: shortHead,
         miners: shortMiner,
+        ledger: shortLedger,
         mining: 3000,
       })
 
       // 整体向左平移一格
       await this.shiftLeft()
 
-      // 长分叉出块后继续挖
+      // 长分叉出块后追加 mining block
       await this.head.mined
       this.head = this.newHead({
         xpos: 5,
@@ -197,13 +201,14 @@ export default {
         mining: 3000,
       })
 
-      // 短分叉出块后继续挖（这次的挖矿时间要长很多）
+      // 短分叉出块后追击 mining block（这次的挖矿时间要长很多）
       await shortHead.mined
       shortHead = this.newHead({
         xpos: 5,
         ypos: 1,
         prev: shortHead,
         miners: shortMiner,
+        ledger: shortLedger,
         mining: 30000,
       })
 
@@ -299,7 +304,7 @@ export default {
       })
       await finished
 
-      // 删除移出显示区的 tail
+      // 删除超出显示区的 tail
       var tail = null
       this.actors.forEach(block => {
         block.xpos --
@@ -329,7 +334,7 @@ export default {
         return
       }
 
-      // 新的挖矿区块
+      // 新的 mining block
       this.head = this.newHead({
         xpos: 5,
         prev: this.head,
@@ -340,7 +345,7 @@ export default {
       // 整体向左平移一格
       this.shiftLeft()
 
-      // 如果在平移期间启动了分叉，这里补充突显效果
+      // 如果在平移期间启动了分叉，这里补充分叉预警效果
       if (this.inSbf || this.inDbf) {
         this.head.flash = true
       }
@@ -352,12 +357,14 @@ export default {
     this.BlockClass = Vue.extend(Block)
     this.actors = new Set()
     this.head = null
+    // 先摆 4 个 mined block
     for (var xpos=0; xpos <= 3; xpos++) {
       this.head = this.newHead({
         xpos,
         prev: this.head,
       })
     }
+    // 再追加一个 mining block
     this.head = this.newHead({
         xpos: 4,
         prev: this.head,
