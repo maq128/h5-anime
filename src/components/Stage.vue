@@ -1,8 +1,11 @@
 <template>
   <div>
     <div class="headbar">实训案例1：比特币分叉</div>
-    <div class="stage" :style="cssProps" ref="stage"></div>
+    <div class="stage" :style="cssProps" ref="stage">
+      <Subtitle ref="subtitle"></Subtitle>
+    </div>
     <div class="footbar">
+      <Audio :source="audioSource" :fullControls="false" @timeupdate="timeupdate"></Audio>
       <button @click="goSbf()" :class="{'in-progress':inSbf}" :disabled="inSbf || inDbf">单块分叉过程</button>
       <button @click="goDbf()" :class="{'in-progress':inDbf}" :disabled="inSbf || inDbf">双块分叉过程</button>
     </div>
@@ -12,10 +15,18 @@
 <script>
 import Vue from 'vue'
 import anime from 'animejs'
+
 import Block from './Block.vue'
+import Subtitle from './Subtitle.vue'
+import Audio from './Audio.vue'
 
 export default {
   name: 'Stage',
+
+  components: {
+    Subtitle,
+    Audio,
+  },
 
   data () {
     return {
@@ -26,6 +37,11 @@ export default {
       },
       inSbf: false,
       inDbf: false,
+
+      audioSource: {
+        url: '',
+        type: ''
+      }
     }
   },
 
@@ -46,10 +62,15 @@ export default {
         '--stage-width': this.width,
         '--stage-height': this.height
       }
-    }
+    },
   },
 
   methods: {
+    timeupdate (ct) {
+      // 把音频组件的播放进度推送给字幕组件
+      this.$refs.subtitle.timeupdate(ct)
+    },
+
     goSbf () {
       if (this.inSbf || this.inDbf) return
       this.inSbf = true
@@ -69,6 +90,10 @@ export default {
     },
 
     async sbf () {
+      // 切换音频和字幕
+      var lrc = require('raw-loader!@/assets/lgfw.lrc').default
+      this.audioSource = this.$refs.subtitle.load(lrc)
+
       // 短分叉上只有一个矿工
       var shortMiner = this.head.miner == 'C' ? 'B' : 'C'
       // 其余矿工都在长分叉上
@@ -144,6 +169,10 @@ export default {
     },
 
     async dbf () {
+      // 切换音频和字幕
+      var lrc = require('raw-loader!@/assets/jzbg.lrc').default
+      this.audioSource = this.$refs.subtitle.load(lrc)
+
       // 短分叉上只有一个矿工
       var shortMiner = this.head.miner == 'C' ? 'B' : 'C'
       // 其余矿工都在长分叉上
@@ -372,6 +401,10 @@ export default {
         mining: 3000,
     })
     this.head.mined.then(this.round)
+
+    // 加载音频和字幕
+    var lrc = require('raw-loader!@/assets/chuanqi.lrc').default
+    this.audioSource = this.$refs.subtitle.load(lrc)
   }
 }
 </script>

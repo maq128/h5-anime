@@ -11,3 +11,7 @@
   | [文档](https://animejs.com/documentation/)
 
 [Vue 中使用 transition](https://segmentfault.com/a/1190000017159826)
+
+[vue3-sfc-loader](https://github.com/FranckFreiburger/vue3-sfc-loader)
+
+[字幕解析器](https://github.com/Rotten-LKZ/subtitle-parser)
