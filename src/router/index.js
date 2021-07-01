@@ -17,6 +17,9 @@ let router = new Router({
       path: '/line-drawing',
       component: resolve => { require(['@/components/StageLineDrawing.vue'], resolve) }
     }, {
+      path: '/dynamic-load',
+      component: resolve => { require(['@/components/StageDynamicLoad.vue'], resolve) }
+    }, {
       path: '*',
       component: null
   }]
