@@ -106,12 +106,7 @@ export default {
         setTimeout(() => {
           this.mining = 0
           this.flash = false
-          setTimeout(() => {
-            // 这里使用 requestAnimationFrame() 是因为：
-            // 当窗口隐藏时，anime 动画都会被锁止，所以 'mined' 消息也应该被锁止，
-            // 以避免主动画流程被异常推进。
-            requestAnimationFrame(resolve)
-          }, 500)
+          setTimeout(resolve, 500)
         }, this.mining)
       })
     } else {

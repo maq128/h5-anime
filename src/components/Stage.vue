@@ -140,7 +140,7 @@ export default {
 
       // 回归正常过程
       this.inSbf = false
-      this.round()
+      this.$nextTick(this.round)
     },
 
     async dbf () {
@@ -237,7 +237,7 @@ export default {
 
       // 回归正常过程
       this.inDbf = false
-      this.round()
+      this.$nextTick(this.round)
     },
 
     newHead ({
@@ -340,15 +340,17 @@ export default {
         prev: this.head,
         mining: 5000,
       })
-      this.head.mined.then(this.round)
 
       // 整体向左平移一格
-      this.shiftLeft()
+      await this.shiftLeft()
 
       // 如果在平移期间启动了分叉，这里补充分叉预警效果
       if (this.inSbf || this.inDbf) {
         this.head.flash = true
       }
+
+      await this.head.mined
+      this.$nextTick(this.round)
     },
   },
 
