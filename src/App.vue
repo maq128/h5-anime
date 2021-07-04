@@ -1,16 +1,17 @@
 <template>
   <div id="app">
-    <Stage height="500px" ref="stage" />
+    <MainMenu />
+    <router-view/>
   </div>
 </template>
 
 <script>
-import Stage from './components/Stage.vue'
+import MainMenu from './components/MainMenu.vue'
 
 export default {
   name: 'App',
   components: {
-    Stage
+    MainMenu
   }
 }
 </script>
