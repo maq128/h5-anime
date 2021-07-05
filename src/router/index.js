@@ -14,6 +14,9 @@ let router = new Router({
       path: '/audio-subtitles',
       component: resolve => { require(['@/components/StageAudioSubtitles.vue'], resolve) }
     }, {
+      path: '/line-drawing',
+      component: resolve => { require(['@/components/StageLineDrawing.vue'], resolve) }
+    }, {
       path: '*',
       component: null
   }]

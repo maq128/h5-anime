@@ -2,6 +2,7 @@
   <div>
     <MainMenuItem path="/bitcoin-forks" title="实训案例1：比特币分叉" />
     <MainMenuItem path="/audio-subtitles" title="音频和字幕" />
+    <MainMenuItem path="/line-drawing" title="LINE DRAWING" />
   </div>
 </template>
 

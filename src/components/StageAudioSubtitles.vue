@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="stage" :style="cssProps" ref="stage">
+    <div class="stage" :style="cssProps">
       <vue-particles></vue-particles>
       <Subtitle ref="subtitle"></Subtitle>
     </div>
