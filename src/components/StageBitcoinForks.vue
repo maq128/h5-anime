@@ -92,7 +92,7 @@ export default {
 
       // 新增短分叉
       var fork = this.head.prev.prev
-      var shortLedger = { ...this.head.ledger }
+      var shortLedger = { ...this.head.prev.ledger }
       var shortHead = this.newHead({
         xpos: fork.xpos + 1,
         ypos: 1,
@@ -173,7 +173,7 @@ export default {
 
       // 新增短分叉
       var fork = this.head.prev.prev
-      var shortLedger = { ...this.head.ledger }
+      var shortLedger = { ...this.head.prev.ledger }
       var shortHead = this.newHead({
         xpos: fork.xpos + 1,
         ypos: 1,
