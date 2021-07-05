@@ -12,6 +12,7 @@
     "core-js": "^3.6.5",
     "subtitle-parser": "^2.0.3",
     "vue": "^2.6.11",
+    "vue-particles": "^1.0.9",
     "vue-router": "^3.5.2"
   },
   "devDependencies": {

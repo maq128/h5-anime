@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="stage" :style="cssProps" ref="stage">
+      <vue-particles></vue-particles>
       <Subtitle ref="subtitle"></Subtitle>
     </div>
     <div class="footbar">
@@ -13,8 +14,13 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import VueParticles from 'vue-particles'
+
 import Subtitle from './Subtitle.vue'
 import Audio from './Audio.vue'
+
+Vue.use(VueParticles)
 
 export default {
   name: 'StageAudioSubtitles',

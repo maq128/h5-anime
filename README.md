@@ -15,3 +15,5 @@
 [vue3-sfc-loader](https://github.com/FranckFreiburger/vue3-sfc-loader)
 
 [字幕解析器](https://github.com/Rotten-LKZ/subtitle-parser)
+
+[粒子效果](https://vue-particles.netlify.app/)

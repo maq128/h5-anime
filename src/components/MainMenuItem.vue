@@ -1,7 +1,7 @@
 <template>
   <div v-if="$route.path == path || $route.path == '/'" class="main-menu-item">
     <span v-if="$route.path == path">
-      <span class="clickable" @click="$router.push({path:'/'})">&lt;返回</span>
+      <span class="clickable" @click="$router.push({path:'/'})">＜返回</span>
       &nbsp;
       <span>{{ title }}</span>
     </span>
@@ -50,5 +50,8 @@ export default {
 }
 .clickable {
   cursor: pointer;
+}
+.clickable:hover {
+  color: #3183f2;
 }
 </style>

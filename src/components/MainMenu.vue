@@ -6,8 +6,6 @@
 </template>
 
 <script>
-// import Vue from 'vue'
-// import anime from 'animejs'
 import MainMenuItem from './MainMenuItem.vue'
 
 export default {
