@@ -56,7 +56,9 @@ export default {
       }
     },
     timeupdate () {
-      this.$emit('timeupdate', this.$refs.audio.currentTime)
+      if (this.$refs.audio) {
+        this.$emit('timeupdate', this.$refs.audio.currentTime)
+      }
     }
   },
 }

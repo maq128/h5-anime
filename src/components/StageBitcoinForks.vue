@@ -276,7 +276,9 @@ export default {
 
       // 加入 Vue 的组件树
       block.$mount()
-      this.$refs.stage.appendChild(block.$el)
+      if (this.$refs.stage) {
+        this.$refs.stage.appendChild(block.$el)
+      }
       this.$children.push(block)
       block.$parent = this
 

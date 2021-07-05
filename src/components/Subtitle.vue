@@ -48,7 +48,9 @@ export default {
           duration: 1000,
         }).finished
         this.line = line
-        this.$refs.line.style.top = 0
+        if (this.$refs.line) {
+          this.$refs.line.style.top = 0
+        }
       }
 
       this.updating = false
