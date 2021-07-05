@@ -9,7 +9,6 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import anime from 'animejs'
 
 export default {
@@ -40,16 +39,14 @@ export default {
     },
   },
 
-  methods: {
-  },
-
   mounted () {
+    var len = anime.setDashoffset(this.$refs.path) * 1.3
+    this.$refs.path.setAttribute('stroke-dasharray', [len, len])
     anime({
       targets: this.$refs.path,
-      strokeDashoffset: [anime.setDashoffset, 0],
-      easing: 'easeInOutSine',
-      duration: 3000,
-      direction: 'alternate',
+      strokeDashoffset: [-len, len],
+      easing: 'linear',
+      duration: 6000,
       loop: true
     });
   }
