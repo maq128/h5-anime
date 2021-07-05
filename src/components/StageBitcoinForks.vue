@@ -172,7 +172,7 @@ export default {
         easing: 'easeOutExpo',
       }).finished
 
-      // 两个新的 mining block（挖矿时间相同）
+      // 两个新的 mining block（挖矿时间相近）
       this.head = this.newHead({
         xpos: 5,
         ypos: -1,
@@ -186,7 +186,7 @@ export default {
         prev: shortHead,
         miners: shortMiner,
         ledger: shortLedger,
-        mining: 3000,
+        mining: 3500,
       })
 
       // 整体向左平移一格
@@ -202,7 +202,7 @@ export default {
         mining: 3000,
       })
 
-      // 短分叉出块后追击 mining block（这次的挖矿时间要长很多）
+      // 短分叉出块后追加 mining block（这次的挖矿时间要长很多）
       await shortHead.mined
       shortHead = this.newHead({
         xpos: 5,
