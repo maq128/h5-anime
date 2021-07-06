@@ -39,6 +39,9 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
+    "ignorePatterns": [
+      "vue2-sfc-loader.js"
+    ],
     "rules": {}
   },
   "browserslist": [

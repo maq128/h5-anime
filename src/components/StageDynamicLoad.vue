@@ -17,8 +17,7 @@
 import vue from 'vue'
 import less from 'less'
 import animejs from 'animejs'
-
-const { loadModule, vueVersion } = window['vue2-sfc-loader']
+import { loadModule, vueVersion } from '@/vue2-sfc-loader.js'
 
 const options = {
   moduleCache: {
