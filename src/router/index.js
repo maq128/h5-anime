@@ -20,6 +20,9 @@ let router = new Router({
       path: '/dynamic-load',
       component: resolve => { require(['@/components/StageDynamicLoad.vue'], resolve) }
     }, {
+      path: '/lrc-maker',
+      component: resolve => { require(['@/components/StageLrcMaker.vue'], resolve) }
+    }, {
       path: '*',
       component: null
   }]

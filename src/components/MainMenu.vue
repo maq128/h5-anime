@@ -4,6 +4,7 @@
     <MainMenuItem path="/audio-subtitles" title="音频和字幕" />
     <MainMenuItem path="/line-drawing" title="LINE DRAWING" />
     <MainMenuItem path="/dynamic-load" title="动态加载组件" />
+    <MainMenuItem path="/lrc-maker" title="字幕文件编辑" />
   </div>
 </template>
 
