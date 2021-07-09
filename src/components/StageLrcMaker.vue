@@ -7,17 +7,19 @@
           :key="idx"
           :class="{
             line: true,
-            begin: line.begin !== null,
-            end: line.end,
             prepare: line.status == 1,
             cur:line.status == 2,
           }"
-        >{{ line.text }}</div>
+        >
+          {{ line.text }}
+          <div v-if="line.begin !== null" class="begin-time">{{ line.begin | formatTime }}</div>
+          <div v-if="line.end !== null" class="end-time">{{ line.end | formatTime }}</div>
+        </div>
       </div>
       <div v-if="lines.length==0" class="help">
         <p>字幕编辑就是要给每条字幕设置以下两个属性：</p>
-        <p>● 入点：开始显示的时间。若该属性已设置，则在左侧以黄色圆点表示。</p>
-        <p>● 出点：结束显示的时间，若未单独设置则与下一条的入点相同。若该属性已设置，则在左侧以灰色圆点表示。</p>
+        <p>● 入点：开始显示的时间。</p>
+        <p>● 出点：结束显示的时间，若未单独设置则与下一条的入点相同。</p>
         <hr>
         <p>工作界面有两种工作模式，准备模式和编辑模式，只要音频开始播放即进入编辑模式。</p>
         <p>在编辑模式，根据音频播放进度，每条字幕有三种表现状态：</p>
@@ -267,16 +269,6 @@ export default {
       this.$refs.audio.load()
     },
 
-    convSecondsToString(sec) {
-      var minutes = Math.floor(sec / 60)
-      var seconds = Math.floor(sec - minutes * 60)
-      var subSeconds = Math.floor((sec - minutes * 60 - seconds) * 100)
-      minutes = String(minutes).padStart(2, '0')
-      seconds = String(seconds).padStart(2, '0')
-      subSeconds = String(subSeconds).padStart(2, '0')
-      return '[' + minutes + ':' + seconds + '.' + subSeconds + ']'
-    },
-
     composeSubtitles() {
       var a = [
         `[url:${this.audioUrl.replaceAll(':', '|')}]`,
@@ -300,15 +292,27 @@ export default {
         firstLine = false
 
         if (line.begin !== null) {
-          text = this.convSecondsToString(line.begin) + text
+          text = '[' + this.$options.filters.formatTime(line.begin) + ']' + text
         }
         a.push(text)
         if (line.end) {
-          a.push(this.convSecondsToString(line.end))
+          a.push('[' + this.$options.filters.formatTime(line.end) + ']')
         }
       })
       this.lrc = a.join('\n')
     }
+  },
+
+  filters: {
+    formatTime(sec) {
+      var minutes = Math.floor(sec / 60)
+      var seconds = Math.floor(sec - minutes * 60)
+      var subSeconds = Math.floor((sec - minutes * 60 - seconds) * 100)
+      minutes = String(minutes).padStart(2, '0')
+      seconds = String(seconds).padStart(2, '0')
+      subSeconds = String(subSeconds).padStart(2, '0')
+      return minutes + ':' + seconds + '.' + subSeconds
+    },
   },
 
   mounted() {
@@ -339,6 +343,13 @@ export default {
 .slide {
   position: relative;
   transition: top 0.3s ease 0s;
+  border-left: 5px dotted transparent;
+  border-right: 5px dotted transparent;
+
+  &:focus {
+    border-left-color: yellow;
+    border-right-color: yellow;
+  }
 
   &:focus-visible {
     outline: unset;
@@ -365,28 +376,22 @@ export default {
     border: 1px solid yellow;
   }
 
-  &.begin:before {
-    content: '';
-    display: block;
+  .begin-time {
     position: absolute;
     left: 10px;
-    top: 15px;
-    width: 10px;
-    height: 10px;
-    border-radius: 5px;
-    background-color: yellow;
+    top: 0;
+    font-size: 9pt;
+    line-height: 19px;
+    color: yellow;
   }
 
-  &.end:after {
-    content: '';
-    display: block;
+  .end-time {
     position: absolute;
-    left: 25px;
-    top: 15px;
-    width: 10px;
-    height: 10px;
-    border-radius: 5px;
-    background-color: gray;
+    left: 10px;
+    top: 20px;
+    font-size: 9pt;
+    line-height: 19px;
+    color: gray;
   }
 }
 
