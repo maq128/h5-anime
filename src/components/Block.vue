@@ -117,6 +117,11 @@ export default {
 </script>
 
 <style scoped lang="less">
+@color-a: #72caf3;
+@color-b: #8273f8;
+@color-c: #4484f5;
+@color-m: #7f8187;
+
 .block {
   position: absolute;
   left: var(--block-x);
@@ -124,27 +129,27 @@ export default {
   background-color: transparent;
   width: 0;
   height: 0;
-}
-.block .A {
-  stroke: #72caf3;
-  color: #72caf3;
-}
-.block .B {
-  stroke: #8273f8;
-  color: #8273f8;
-}
-.block .C {
-  stroke: #4484f5;
-  color: #4484f5;
-}
-.block .M {
-  stroke: #7f8187;
-  color: #7f8187;
-}
-.block .flash {
-  stroke: #f6ca5d;
-  color: #f6ca5d;
-  filter: drop-shadow( 0 0 5px gold );
+  .A {
+    stroke: @color-a;
+    color: @color-a;
+  }
+  .B {
+    stroke: @color-b;
+    color: @color-b;
+  }
+  .C {
+    stroke: @color-c;
+    color: @color-c;
+  }
+  .M {
+    stroke: @color-m;
+    color: @color-m;
+  }
+  .flash {
+    stroke: #f6ca5d;
+    color: #f6ca5d;
+    filter: drop-shadow( 0 0 5px gold );
+  }
 }
 svg {
   overflow: visible;

@@ -16,24 +16,24 @@
       </div>
       <div v-if="lines.length==0" class="help">
         <p>字幕编辑就是要给每条字幕设置以下两个属性：</p>
-        <p>● 入点：开始显示的时间。该属性若已设置，则在左侧以黄色圆点表示。</p>
-        <p>● 出点：结束显示的时间，若未单独设置则与下一条的入点相同。该属性若已设置，则在左侧以灰色圆点表示。</p>
-        <hr>
-        <p>在编辑模式每条字幕有三种表现状态：</p>
-        <p>● 空闲状态：音频播放的当前进度与本条字幕无关。</p>
-        <p>● 预备状态：根据音频播放进度，即将要设置本条字幕的入点。本状态用灰色外框表示。</p>
-        <p>● 显示状态：本条字幕已设置入点，正等待设置出点。本状态用黄色外框表示。</p>
+        <p>● 入点：开始显示的时间。若该属性已设置，则在左侧以黄色圆点表示。</p>
+        <p>● 出点：结束显示的时间，若未单独设置则与下一条的入点相同。若该属性已设置，则在左侧以灰色圆点表示。</p>
         <hr>
         <p>工作界面有两种工作模式，准备模式和编辑模式，只要音频开始播放即进入编辑模式。</p>
+        <p>在编辑模式，根据音频播放进度，每条字幕有三种表现状态：</p>
+        <p>● 空闲状态：本条字幕无可操作。</p>
+        <p>● 预备状态：本条字幕即将要设置入点。本状态用灰色外框表示。</p>
+        <p>● 显示状态：本条字幕已设置入点，正等待设置出点。本状态用黄色外框表示。</p>
+        <hr>
         <p>有四个按键可以用来控制字幕打点：</p>
-        <p>● 空格键：如果当前行处于预备状态，则切换到显示状态（并设置入点）；如果当前行处于显示状态，则切换到下一行显示状态（并设置入点）。</p>
-        <p>● 回车键：如果当前行处于显示状态，则切换到空闲状态（并设置出点），同时进入下一行预备状态；否则此键无效。</p>
-        <p>● 上箭头：回到上一行显示状态，同时音频也回到上一条的入点；如果已在首行，则首行回到预备状态。</p>
-        <p>● 下箭头：进入下一行显示状态，同时音频也进到下一条的入点。如果下一条尚未设置入点，则此键无效。</p>
+        <p>● 空格键：如果当前行处于预备状态，则为其设置入点，并转为显示状态；如果当前行处于显示状态，则转为空闲状态，同时下一行设置入点并转为显示状态。</p>
+        <p>● 回车键：如果当前行处于显示状态，则为其设置出点，并转为空闲状态，同时下一行进入预备状态；否则此键无效。</p>
+        <p>● 上箭头：回到上一行显示状态，同时音频进度也跳到上一行的入点；如果已在首行，则首行回到预备状态，同时音频进度跳到开头。</p>
+        <p>● 下箭头：进入下一行显示状态，同时音频进度也跳到下一行的入点。如果下一条尚未设置入点，则此键无效。</p>
         <hr>
         <p>关于四个按键的作用：</p>
         <p>空格键用于设置入点（同时可能清除出点），回车键用于设置出点。这两个键仅在编辑模式下可用，不会影响音频播放进度。</p>
-        <p>上/下箭头用于移动当前行，并把音频播放进度调整到对应的入点。这两个键不会影响入点和出点。</p>
+        <p>上/下箭头用于移动当前行，并把音频播放进度跳到对应的入点。这两个键不会影响入点和出点。</p>
       </div>
     </div>
     <div class="toolbar">
@@ -54,8 +54,6 @@
 </template>
 
 <script>
-import anime from 'animejs'
-
 export default {
   name: 'StageLrcMaker',
 
@@ -96,12 +94,7 @@ export default {
       if (n >= this.lines.length) n = this.lines.length - 1
       n -= 9
       if (n < 0) n = 0
-      anime({
-        targets: this.$refs.slide,
-        top: -n * 40,
-        easing: 'easeOutQuad',
-        duration: 500,
-      })
+      this.$refs.slide.style.top = '-' + (n*40) + 'px'
     }
   },
 
@@ -317,7 +310,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .stage {
   background-color: #212128;
   width: var(--stage-width);
@@ -325,74 +318,90 @@ export default {
   position: relative;
   overflow: hidden;
 }
+
 .slide {
   position: relative;
+  transition: top 0.3s ease 0s;
+
+  &:focus-visible {
+    outline: unset;
+  }
 }
-.slide:focus-visible {
-  outline: unset;
-}
+
 .line {
   position: relative;
   height: 40px;
-  line-height: 40px;
-  font-size: 30px;
+  line-height: 35px;
+  font-size: 25px;
   text-align: center;
-  color: white;
-  white-space: pre;
   margin: 0 0.5em;
+  color: gray;
   border: 1px solid transparent;
+
+  &.prepare {
+    color: silver;
+    border: 1px solid silver;
+  }
+
+  &.cur {
+    color: white;
+    border: 1px solid yellow;
+  }
+
+  &.begin:before {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 10px;
+    top: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: yellow;
+  }
+
+  &.end:after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 25px;
+    top: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: gray;
+  }
 }
-.line.prepare {
-  border: 1px solid silver;
-}
-.line.cur {
-  border: 1px solid yellow;
-}
-.line.begin:before {
-  content: '';
-  display: block;
-  position: absolute;
-  left: 10px;
-  top: 15px;
-  width: 10px;
-  height: 10px;
-  border-radius: 5px;
-  background-color: yellow;
-}
-.line.end:after {
-  content: '';
-  display: block;
-  position: absolute;
-  left: 25px;
-  top: 15px;
-  width: 10px;
-  height: 10px;
-  border-radius: 5px;
-  background-color: gray;
-}
+
 .toolbar {
   padding: 0;
+
+  audio {
+    vertical-align: middle;
+  }
+
+  input {
+    margin-right: 1em;
+  }
+
+  button {
+    margin-left: 0.5em;
+  }
 }
-.toolbar audio {
-  vertical-align: middle;
-}
-.toolbar input {
-  margin-right: 1em;
-}
-.toolbar button {
-  margin-left: 0.5em;
-}
+
 .lrc {
   display: block;
   width: var(--stage-width);
   height: var(--stage-height);
 }
+
 .help {
   font-size: 10pt;
   color: white;
   padding: 0.5em 1em;
-}
-.help p {
-  margin: 0 0 0.3em 0;
+
+  p {
+    margin: 0 0 0.3em 0;
+  }
 }
 </style>
