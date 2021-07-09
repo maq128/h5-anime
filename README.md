@@ -17,3 +17,6 @@
 [字幕解析器](https://github.com/Rotten-LKZ/subtitle-parser)
 
 [粒子效果](https://vue-particles.netlify.app/)
+
+[`HTML <audio>`](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/audio)
+  | [HTMLMediaElement](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLMediaElement)

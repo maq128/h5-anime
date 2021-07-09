@@ -7,10 +7,10 @@
           :key="idx"
           :class="{
             line: true,
-            begin: line.begin,
+            begin: line.begin !== null,
             end: line.end,
-            prepare: line.status==1,
-            cur:line.status==2,
+            prepare: line.status == 1,
+            cur:line.status == 2,
           }"
         >{{ line.text }}</div>
       </div>
@@ -42,6 +42,7 @@
         @pause="playing=false"
         @ended="playing=false"
         @emptied="playing=false"
+        @seeked="onSeeked"
       >
         <source :src="audioUrl" type="audio/mpeg">
       </audio>
@@ -155,37 +156,53 @@ export default {
     },
 
     onKeyArrowUp() {
-      // 当前行解除任何状态（除非已超出尾部）
-      if (this.cur < this.lines.length) {
-        this.lines[this.cur].status = 0
-      }
-
-      // 如果是在首行，则首行进入预备状态
+      // 已在首行时，播放进度跳到开头
       if (this.cur == 0) {
-        this.lines[this.cur].status = 1
         this.$refs.audio.currentTime = 0
         return
       }
 
-      // 回到上一行，进入显示状态
-      this.cur --
-      this.lines[this.cur].status = 2
-      this.$refs.audio.currentTime = this.lines[this.cur].begin
+      // 确保上一行的入点可用
+      if (this.lines[this.cur - 1].begin === null) return
+      if (this.lines[this.cur].begin === null) return
+      if (this.lines[this.cur - 1].begin > this.lines[this.cur].begin) return
+
+      // 播放进度跳到上一行的入点
+      this.$refs.audio.currentTime = this.lines[this.cur - 1].begin
     },
 
     onKeyArrowDown() {
+      // 确保下一行的入点可用
       if (this.cur >= this.lines.length - 1) return
-      if (!this.lines[this.cur].begin) return
-      if (!this.lines[this.cur + 1].begin) return
+      if (this.lines[this.cur].begin === null) return
+      if (this.lines[this.cur + 1].begin === null) return
       if (this.lines[this.cur + 1].begin < this.lines[this.cur].begin) return
 
-      // 当前行解除任何状态
-      this.lines[this.cur].status = 0
+      // 播放进度跳到下一行的入点
+      this.$refs.audio.currentTime = this.lines[this.cur + 1].begin
+    },
 
-      // 进到下一行，进入显示状态
-      this.cur ++
-      this.lines[this.cur].status = 2
-      this.$refs.audio.currentTime = this.lines[this.cur].begin
+    onSeeked() {
+      if (this.lines.length == 0) return
+      if (this.cur < this.lines.length) {
+        this.lines[this.cur].status = 0
+      }
+
+      // 取得当前播放进度（加一个偏移是为了避免浮点数误差导致的误判）
+      var ct = this.$refs.audio.currentTime + 0.01
+
+      // 找到当前播放进度对应的字幕行
+      for (var i = this.lines.length - 1; i >= 0; i--) {
+        if (this.lines[i].begin !== null && this.lines[i].begin <= ct) {
+          // 找到了，则设置其为当前行
+          this.cur = i
+          this.lines[this.cur].status = 2
+          return
+        }
+      }
+      // 没找到，则首行进入预备状态
+      this.cur = 0
+      this.lines[this.cur].status = 1
     },
 
     changeAudio() {
