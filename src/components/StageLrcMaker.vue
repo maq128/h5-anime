@@ -14,6 +14,7 @@
           {{ line.text }}
           <div v-if="line.begin !== null" class="begin-time">{{ line.begin | formatTime }}</div>
           <div v-if="line.end !== null" class="end-time">{{ line.end | formatTime }}</div>
+          <div v-if="cur == idx" :class="{'play-time':true, up:line.status==1}">{{ playTime | formatTime }}</div>
         </div>
       </div>
       <div v-if="lines.length==0" class="help">
@@ -45,6 +46,7 @@
         @ended="playing=false"
         @emptied="playing=false"
         @seeked="onSeeked"
+        @timeupdate="timeupdate"
       >
         <source :src="audioUrl" type="audio/mpeg">
       </audio>
@@ -67,6 +69,7 @@ export default {
       lines: [],
       cur: 0,
       playing: false,
+      playTime: 0,
     }
   },
 
@@ -205,6 +208,10 @@ export default {
       // 没找到，则首行进入预备状态
       this.cur = 0
       this.lines[this.cur].status = 1
+    },
+
+    timeupdate () {
+      this.playTime = this.$refs.audio.currentTime
     },
 
     changeAudio() {
@@ -392,6 +399,20 @@ export default {
     font-size: 9pt;
     line-height: 19px;
     color: gray;
+  }
+
+  .play-time {
+    position: absolute;
+    left: 10px;
+    top: 19px;
+    font-size: 9pt;
+    line-height: 19px;
+    color: white;
+    background-color: #212128;
+  }
+
+  .play-time.up {
+    top: 0;
   }
 }
 
