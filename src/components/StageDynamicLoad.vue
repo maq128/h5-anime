@@ -17,7 +17,7 @@
 import vue from 'vue'
 import less from 'less'
 import animejs from 'animejs'
-import { loadModule, vueVersion } from '@/vue2-sfc-loader.js'
+import { loadModule, vueVersion } from 'vue2_sfc_loader'
 
 const options = {}
 
