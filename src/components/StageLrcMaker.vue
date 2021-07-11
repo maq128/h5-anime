@@ -1,23 +1,14 @@
 <template>
   <div :style="cssProps">
     <div class="stage">
-      <div ref="slide" class="slide" @keydown="onKeyDown" tabindex="0">
-        <div
-          v-for="(line, idx) in lines"
-          :key="idx"
-          :class="{
-            line: true,
-            prepare: line.status == 1,
-            cur:line.status == 2,
-          }"
-        >
-          {{ line.text }}
-          <div v-if="line.begin !== null" class="begin-time">{{ line.begin | formatTime }}</div>
-          <div v-if="line.end !== null" class="end-time">{{ line.end | formatTime }}</div>
-          <div v-if="cur == idx" :class="{'play-time':true, up:line.status==1}">{{ playTime | formatTime }}</div>
-        </div>
-      </div>
-      <div v-if="lines.length==0" class="help">
+      <StageLrcEditor
+        v-if="mode=='edit'"
+        ref="editor"
+        :playing="playing"
+        :playTime="playTime"
+        @seek="onEditorSeek"
+      />
+      <div v-if="mode=='setting'" class="help">
         <p>字幕编辑就是要给每条字幕设置以下两个属性：</p>
         <p>● 入点：开始显示的时间。</p>
         <p>● 出点：结束显示的时间，若未单独设置则与下一条的入点相同。</p>
@@ -45,29 +36,30 @@
         @pause="playing=false"
         @ended="playing=false"
         @emptied="playing=false"
-        @seeked="onSeeked"
+        @seeked="onAudioSeeked"
         @timeupdate="timeupdate"
       >
         <source :src="audioUrl" type="audio/mpeg">
       </audio>
       <input type="text" @change="changeAudio" v-model="audioUrl" :disabled="playing" size="60">
-      <button @click="parseSubtitles">↑↑提取字幕文本</button>
-      <button @click="composeSubtitles">↓↓合成LRC</button>
+      <button @click="parseLrc">↑↑提取字幕文本</button>
+      <button @click="composeLrc" :disabled="mode!=='edit'">↓↓合成LRC</button>
     </div>
     <textarea class="lrc" v-model="lrc" :disabled="playing"></textarea>
   </div>
 </template>
 
 <script>
+import StageLrcEditor from './StageLrcEditor'
+
 export default {
   name: 'StageLrcMaker',
 
   data () {
     return {
+      mode: 'setting', // setting/edit
       audioUrl: '/chuanqi.mp3',
       lrc: require('raw-loader!@/assets/chuanqi.lrc').default,
-      lines: [],
-      cur: 0,
       playing: false,
       playTime: 0,
     }
@@ -84,6 +76,10 @@ export default {
     }
   },
 
+  components: {
+    StageLrcEditor
+  },
+
   computed: {
     cssProps() {
       return {
@@ -93,247 +89,37 @@ export default {
     },
   },
 
-  watch: {
-    cur(val) {
-      // 屏幕可显示 10 行文本，当前行切换时，移动 slide，尽量保证当前行显示在中间附近
-      var n = val + 5
-      if (n >= this.lines.length) n = this.lines.length - 1
-      n -= 9
-      if (n < 0) n = 0
-      this.$refs.slide.style.top = '-' + (n*40) + 'px'
-    }
-  },
-
   methods: {
-    onKeyDown(evt) {
-      if (evt.key == ' ') {
-        this.onKeySpace()
-      } else if (evt.key == 'Enter') {
-        this.onKeyEnter()
-      } else if (evt.key == 'ArrowUp') {
-        this.onKeyArrowUp()
-      } else if (evt.key == 'ArrowDown') {
-        this.onKeyArrowDown()
-      } else {
-        return
-      }
-      evt.stopPropagation()
-      evt.preventDefault()
-    },
-
-    onKeySpace() {
-      if (!this.playing) return
-      if (this.cur >= this.lines.length) return
-      var line = this.lines[this.cur]
-      if (line.status == 1) {
-        // 当前行处于预备状态，则进入显示状态
-        line.status = 2
-        line.begin = this.$refs.audio.currentTime
-      } else {
-        // 当前行处于显示状态，解除
-        line.status = 0
-        line.end = null
-
-        // 下一行进入显示状态
-        this.cur ++
-        if (this.cur >= this.lines.length) return
-        line = this.lines[this.cur]
-        line.status = 2
-        line.begin = this.$refs.audio.currentTime
-      }
-    },
-
-    onKeyEnter() {
-      if (!this.playing) return
-      if (this.cur >= this.lines.length) return
-      var line = this.lines[this.cur]
-      if (line.status != 2) return
-
-      // 当前行处于显示状态，解除
-      line.status = 0
-      line.end = this.$refs.audio.currentTime
-
-      // 下一行进入预备状态
-      this.cur ++
-      if (this.cur >= this.lines.length) return
-      line = this.lines[this.cur]
-      line.status = 1
-    },
-
-    onKeyArrowUp() {
-      // 已在首行时，播放进度跳到开头
-      if (this.cur == 0) {
-        this.$refs.audio.currentTime = 0
-        return
-      }
-
-      // 确保上一行的入点可用
-      if (this.lines[this.cur - 1].begin === null) return
-      if (this.lines[this.cur].begin === null) return
-      if (this.lines[this.cur - 1].begin > this.lines[this.cur].begin) return
-
-      // 播放进度跳到上一行的入点
-      this.$refs.audio.currentTime = this.lines[this.cur - 1].begin
-    },
-
-    onKeyArrowDown() {
-      // 确保下一行的入点可用
-      if (this.cur >= this.lines.length - 1) return
-      if (this.lines[this.cur].begin === null) return
-      if (this.lines[this.cur + 1].begin === null) return
-      if (this.lines[this.cur + 1].begin < this.lines[this.cur].begin) return
-
-      // 播放进度跳到下一行的入点
-      this.$refs.audio.currentTime = this.lines[this.cur + 1].begin
-    },
-
-    onSeeked() {
-      if (this.lines.length == 0) return
-      if (this.cur < this.lines.length) {
-        this.lines[this.cur].status = 0
-      }
-
-      // 取得当前播放进度（加一个偏移是为了避免浮点数误差导致的误判）
-      var ct = this.$refs.audio.currentTime + 0.01
-
-      // 找到当前播放进度对应的字幕行
-      for (var i = this.lines.length - 1; i >= 0; i--) {
-        if (this.lines[i].begin !== null && this.lines[i].begin <= ct) {
-          // 找到了，则设置其为当前行
-          this.cur = i
-          this.lines[this.cur].status = 2
-          return
-        }
-      }
-      // 没找到，则首行进入预备状态
-      this.cur = 0
-      this.lines[this.cur].status = 1
+    changeAudio() {
+      // 当音频 url 改变时，重新加载音频
+      this.$refs.audio.load()
     },
 
     timeupdate () {
       this.playTime = this.$refs.audio.currentTime
     },
 
-    changeAudio() {
-      // 当音频 url 改变时，重新加载音频
-      this.$refs.audio.load()
+    onAudioSeeked() {
+      this.playTime = this.$refs.audio.currentTime
+      this.$refs.editor.seekJump()
     },
 
-    parseSubtitles() {
-      var prevLine = null
-      var offset = 0
-      this.lines = this.lrc.trim().split('\n')
-        // 从每行文本中提取出字幕和 begin
-        .map(str => {
-          var [, timeSeg, minutes, seconds, subSeconds, meta, text]
-            = str.trim().match(/^(\[([0-9]{2}):([0-9]{2})\.([0-9]{2})\])?(\[.+\])?(.*)$/)
-          if (meta) {
-            // 如果设置了 offset 则提取出来
-            var m = meta.trim().match(/^\[offset:\s*(-?[0-9]+)\]$/)
-            if (m) {
-              offset = parseInt(m[1]) / 1000
-            }
-
-            // 如果设置了 url 则提取出来
-            m = meta.trim().match(/^\[url:(.+)\]$/)
-            if (m) {
-              this.audioUrl = m[1].trim().replace('|//', '://')
-            }
-            return
-          }
-          var line = {
-            text,
-            begin: null,
-            end: null,
-            status: 0
-          }
-          if (timeSeg) {
-            line.begin = parseInt(minutes) * 60 + parseInt(seconds) + (parseInt(subSeconds) / 100) - offset
-            if (line.begin < 0) line.begin = 0
-          }
-          return line
-        })
-        // 剔除只有 meta 的行
-        .filter(line => line)
-        // 把空行的 begin 转化为上一行的 end
-        .map(line => {
-          if (line.text.length > 0) {
-            prevLine = line
-            return line
-          }
-          if (prevLine && line.begin) {
-            prevLine.end = line.begin
-          }
-          return line
-        })
-        // 剔除空行
-        .filter(line => line.text.length > 0)
-
-      this.cur = 0
-      if (this.lines.length > 0) {
-        this.lines[0].status = 1
-      }
-      this.$refs.audio.load()
+    onEditorSeek(ct) {
+      this.$refs.audio.currentTime = ct
     },
 
-    composeSubtitles() {
-      var a = [
-        `[url:${this.audioUrl.replaceAll(':', '|')}]`,
-      ]
-
-      var firstLine = true
-
-      this.lines.forEach(line => {
-        var text = line.text
-
-        // 首行特殊处理
-        if (firstLine) {
-          if (line.begin !== null) {
-            if (line.begin > 0.8) {
-              a.push('[00:00.00]')
-            } else {
-              line.begin = 0
-            }
-          }
-        }
-        firstLine = false
-
-        if (line.begin !== null) {
-          text = '[' + this.$options.filters.formatTime(line.begin) + ']' + text
-        }
-        a.push(text)
-        if (line.end) {
-          a.push('[' + this.$options.filters.formatTime(line.end) + ']')
-        }
+    parseLrc() {
+      this.mode = 'edit'
+      this.$nextTick(() => {
+        this.$refs.editor.parseLrc(this.lrc.trim())
+        this.$refs.audio.load()
       })
-      this.lrc = a.join('\n')
-    }
-  },
-
-  filters: {
-    formatTime(sec) {
-      var minutes = Math.floor(sec / 60)
-      var seconds = Math.floor(sec - minutes * 60)
-      var subSeconds = Math.floor((sec - minutes * 60 - seconds) * 100)
-      minutes = String(minutes).padStart(2, '0')
-      seconds = String(seconds).padStart(2, '0')
-      subSeconds = String(subSeconds).padStart(2, '0')
-      return minutes + ':' + seconds + '.' + subSeconds
     },
-  },
 
-  mounted() {
-    // 定时器，确保输入焦点在字幕区，以便接收键盘控制
-    this.timer = setInterval(() => {
-      if (this.playing && this.$refs.slide) {
-        this.$refs.slide.focus()
-      }
-    }, 500)
-  },
-
-  destroyed() {
-    // 移除定时器
-    clearInterval(this.timer)
+    composeLrc() {
+      if (this.mode !== 'edit') return
+      this.lrc = this.$refs.editor.composeLrc()
+    }
   }
 }
 </script>
@@ -345,75 +131,6 @@ export default {
   height: var(--stage-height);
   position: relative;
   overflow: hidden;
-}
-
-.slide {
-  position: relative;
-  transition: top 0.3s ease 0s;
-  border-left: 5px dotted transparent;
-  border-right: 5px dotted transparent;
-
-  &:focus {
-    border-left-color: yellow;
-    border-right-color: yellow;
-  }
-
-  &:focus-visible {
-    outline: unset;
-  }
-}
-
-.line {
-  position: relative;
-  height: 40px;
-  line-height: 35px;
-  font-size: 25px;
-  text-align: center;
-  margin: 0 0.5em;
-  color: gray;
-  border: 1px solid transparent;
-
-  &.prepare {
-    color: silver;
-    border: 1px solid silver;
-  }
-
-  &.cur {
-    color: white;
-    border: 1px solid yellow;
-  }
-
-  .begin-time {
-    position: absolute;
-    left: 10px;
-    top: 0;
-    font-size: 9pt;
-    line-height: 19px;
-    color: yellow;
-  }
-
-  .end-time {
-    position: absolute;
-    left: 10px;
-    top: 20px;
-    font-size: 9pt;
-    line-height: 19px;
-    color: gray;
-  }
-
-  .play-time {
-    position: absolute;
-    left: 10px;
-    top: 19px;
-    font-size: 9pt;
-    line-height: 19px;
-    color: white;
-    background-color: #212128;
-  }
-
-  .play-time.up {
-    top: 0;
-  }
 }
 
 .toolbar {
