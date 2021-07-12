@@ -26,11 +26,13 @@ export default {
   methods: {
     load (lrc) {
       this.parser = new SubtitleParser(lrc)
-      this.lines = this.parser.subtitle.content
-      return {
-        url: this.parser.subtitle.url.replace('|', ':'),
-        type: this.parser.subtitle.type || 'audio/mpeg'
+      var { url, type, content } = this.parser.subtitle
+      this.lines = content
+      if (url) {
+        url = url.replace('|//', '://')
+        type = type || 'audio/mpeg'
       }
+      return { url, type }
     },
     async timeupdate (ct) {
       if (this.updating) return
