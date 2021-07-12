@@ -23,7 +23,7 @@
 // StageLrcEditor 组件的接口定义：
 //
 // props:
-//    playing: Boolean 音频是否正在播放。若播放即为编辑模式，此时 Space/Enter 键可以操作，且输入焦点会主动拉回。
+//    playing: Boolean 音频是否正在播放。在播放状态下 Space/Enter 键可以操作，且输入焦点会主动拉回。
 //    playTime: Number 由外部输入的音频实时播放进度。
 //
 // methods:
@@ -247,9 +247,13 @@ export default {
 
     // 由外部调用
     composeLrc() {
-      var a = [
-        `[url:${this.audioUrl.replaceAll(':', '|')}]`,
-      ]
+      var a = []
+      if (this.audioUrl) {
+        a.push(`[url:${this.audioUrl.replaceAll(':', '|')}]`)
+      }
+      if (this.audioType) {
+        a.push(`[type:${this.audioType}]`)
+      }
 
       var firstLine = true
 
