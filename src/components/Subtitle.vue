@@ -5,6 +5,12 @@
 </template>
 
 <script>
+// Subtitle 组件的接口定义：
+//
+// methods:
+//    load: 供外部调用，设置 LRC 格式的字幕文件内容。
+//    timeupdate: 供外部调用，设置音频的实时播放进度。
+
 import anime from 'animejs'
 import SubtitleParser from 'subtitle-parser'
 

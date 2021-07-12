@@ -20,13 +20,29 @@
 </template>
 
 <script>
+// StageLrcEditor 组件的接口定义：
+//
+// props:
+//    playing: Boolean 音频是否正在播放。若播放即为编辑模式，此时 Space/Enter 键可以操作，且输入焦点会主动拉回。
+//    playTime: Number 由外部输入的音频实时播放进度。
+//
+// methods:
+//    parseLrc: 供外部调用，设置 LRC（也可以只包含字幕文本不含时间信息）。
+//    composeLrc: 供外部调用，返还 LRC 格式的字幕文件。
+//    seekJump: 供外部调用，表示音频播放进度发生了跳转。
+//
+// events:
+//    seek: 通知外部，请求音频播放进度跳转到指定的位置（因为 ArrowUp/ArrowDown 操作）。
+
 export default {
   name: 'StageLrcEditor',
 
   data () {
     return {
       lines: [],
-      cur: 0
+      cur: 0,
+      audioUrl: null,
+      audioType: null,
     }
   },
 
@@ -163,6 +179,8 @@ export default {
     parseLrc(lrc) {
       var prevLine = null
       var offset = 0
+      this.audioUrl = null
+      this.audioType = null
       this.lines = lrc.trim().split('\n')
         // 从每行文本中提取出字幕和 begin
         .map(str => {
@@ -179,6 +197,12 @@ export default {
             m = meta.trim().match(/^\[url:(.+)\]$/)
             if (m) {
               this.audioUrl = m[1].trim().replace('|//', '://')
+            }
+
+            // 如果设置了 type 则提取出来
+            m = meta.trim().match(/^\[type:(.+)\]$/)
+            if (m) {
+              this.audioType = m[1].trim()
             }
             return
           }
@@ -213,6 +237,11 @@ export default {
       this.cur = 0
       if (this.lines.length > 0) {
         this.lines[0].status = 1
+      }
+
+      return {
+        url: this.audioUrl,
+        type: this.audioType
       }
     },
 

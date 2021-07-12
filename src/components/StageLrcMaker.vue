@@ -8,6 +8,10 @@
         :playTime="playTime"
         @seek="onEditorSeek"
       />
+      <Subtitle
+        v-if="mode=='demo'"
+        ref="subtitle"
+      />
       <div v-if="mode=='setting'" class="help">
         <p>字幕编辑就是要给每条字幕设置以下两个属性：</p>
         <p>● 入点：开始显示的时间。</p>
@@ -39,11 +43,12 @@
         @seeked="onAudioSeeked"
         @timeupdate="timeupdate"
       >
-        <source :src="audioUrl" type="audio/mpeg">
+        <source :src="audioUrl" :type="audioType">
       </audio>
-      <input type="text" @change="changeAudio" v-model="audioUrl" :disabled="playing" size="60">
+      <input type="text" @change="changeAudio" v-model="audioUrl" :disabled="playing" size="48">
       <button @click="parseLrc">↑↑提取字幕文本</button>
       <button @click="composeLrc" :disabled="mode!=='edit'">↓↓合成LRC</button>
+      <button @click="demoPlay">↑↑试播LRC</button>
     </div>
     <textarea class="lrc" v-model="lrc" :disabled="playing"></textarea>
   </div>
@@ -51,14 +56,16 @@
 
 <script>
 import StageLrcEditor from './StageLrcEditor'
+import Subtitle from './Subtitle'
 
 export default {
   name: 'StageLrcMaker',
 
   data () {
     return {
-      mode: 'setting', // setting/edit
+      mode: 'setting', // setting/edit/demo
       audioUrl: '/chuanqi.mp3',
+      audioType: 'audio/mpeg',
       lrc: require('raw-loader!@/assets/chuanqi.lrc').default,
       playing: false,
       playTime: 0,
@@ -77,7 +84,8 @@ export default {
   },
 
   components: {
-    StageLrcEditor
+    StageLrcEditor,
+    Subtitle
   },
 
   computed: {
@@ -97,11 +105,16 @@ export default {
 
     timeupdate () {
       this.playTime = this.$refs.audio.currentTime
+      if (this.mode === 'demo') {
+        this.$refs.subtitle.timeupdate(this.playTime)
+      }
     },
 
     onAudioSeeked() {
       this.playTime = this.$refs.audio.currentTime
-      this.$refs.editor.seekJump()
+      if (this.mode === 'edit') {
+        this.$refs.editor.seekJump()
+      }
     },
 
     onEditorSeek(ct) {
@@ -111,7 +124,9 @@ export default {
     parseLrc() {
       this.mode = 'edit'
       this.$nextTick(() => {
-        this.$refs.editor.parseLrc(this.lrc.trim())
+        var { url, type } = this.$refs.editor.parseLrc(this.lrc.trim())
+        if (url) this.audioUrl = url
+        if (type) this.audioType = type
         this.$refs.audio.load()
       })
     },
@@ -119,6 +134,17 @@ export default {
     composeLrc() {
       if (this.mode !== 'edit') return
       this.lrc = this.$refs.editor.composeLrc()
+    },
+
+    demoPlay() {
+      this.mode = 'demo'
+      this.$nextTick(() => {
+        var { url, type } = this.$refs.subtitle.load(this.lrc.trim())
+        if (url) this.audioUrl = url
+        if (type) this.audioType = type
+        this.$refs.audio.load()
+        this.$refs.audio.play()
+      })
     }
   }
 }
